@@ -1,11 +1,11 @@
 
-import { render  } from "./React.js"
+import React from "./React.js"
 
 export default {
   createRoot: (container) => {
     return {
       render: (el) => {
-        render(el, container)
+        React.render(el, container)
       }
     }
   }
