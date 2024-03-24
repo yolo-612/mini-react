@@ -4,7 +4,7 @@ import React from "./core/React.js"
 // const App = React.createElement('div', {id: 'app'}, 'app6', ' text1212')
 
 // 这里怎么触发React的api了？？？？？ ===> jsx文件编译静默触发
-const App = <div>12212<br/><span>hi-yolo</span></div>
+const App = <div>12212<br/><span>hi- jiangjiang yolo612</span></div>
 
 // ===》 打印一下看看
 

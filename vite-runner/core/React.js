@@ -58,50 +58,66 @@ function workLoop(deadline){
   requestIdleCallback(workLoop)
 }
 
-// 返回下一个需要执行的任务
-function performWorkOfUnit(work){
+// 创建dom
+function createDom(type){
+  return type === 'TEXT_ELEMENT' ? 
+  document.createTextNode('') : document.createElement(type)
+}
 
-  if(!work.dom){
-    // 1. 创建dom
-    const dom = ( work.dom = work.type === 'TEXT_ELEMENT' ? 
-      document.createTextNode('') : document.createElement(work.type))
+// 执行props赋值属性
+function updateProps(dom, props){
+  Object.keys(props).forEach((prop)=>{
+    if(prop !== 'children'){
+      dom[prop] = props[prop]
+    }
+  })
+}
 
-    // 添加节点
-    work.parent.dom.append(dom)
-
-    // 2. 执行props赋值属性
-    Object.keys(work.props).forEach((prop)=>{
-      if(prop !== 'children'){
-        dom[prop] = work.props[prop]
-      }
-    })
-  }
-
-  // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
-  const children = work.props.children
-  let preWorkItem = null
+// 转换成链表
+function initChildren(fiber){
+  const children = fiber.props.children
+  let prevChild = null
 
   children.forEach((child, index)=>{
-    const newWorkItem = {
+    const newFiberItem = {
       type: child.type,
       props: child.props,
       child: null,
-      parent: work,
+      parent: fiber,
       sibling: null,
       dom: null
     }
     if(index === 0){
-      work.child = newWorkItem
+      fiber.child = newFiberItem
     }else{
-      preWorkItem.sibling = newWorkItem
+      prevChild.sibling = newFiberItem
     }
-    preWorkItem = newWorkItem
+    prevChild = newFiberItem
   })
+}
+
+
+// 返回下一个需要执行的任务
+function performWorkOfUnit(fiber){
+
+  if(!fiber.dom){
+    // 1. 创建dom
+    const dom =  (fiber.dom = createDom(fiber.type))
+
+    // 添加节点
+    fiber.parent.dom.append(dom)
+
+    // 2. 执行props赋值属性
+    updateProps(dom, fiber.props)
+  }
+
+  // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
+  initChildren(fiber)
 
   // 4. 返回下一个需要渲染的节点
-  if(work.child) return work.child
-  if(work.sibling) return work.sibling
-  return work.parent?.sibling
+  if(fiber.child) return fiber.child
+  if(fiber.sibling) return fiber.sibling
+  return fiber.parent?.sibling
 }
 
 requestIdleCallback(workLoop)
