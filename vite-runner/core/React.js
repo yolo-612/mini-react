@@ -27,20 +27,6 @@ function render(el, container){
       children: [el]
     }
   }
-  // const dom = el.type === 'TEXT_ELEMENT' ? 
-  //   document.createTextNode('') : document.createElement(el.type)
-  
-  // Object.keys(el.props).forEach((prop)=>{
-  //   if(prop !== 'children'){
-  //     dom[prop] = el.props[prop]
-  //   }
-  // })
-
-  // el.props.children.forEach((child)=>{
-  //   render(child, dom)
-  // })
-
-  // container.append(dom)
 }
 
 // 这个是替换 之前递归的过程的
