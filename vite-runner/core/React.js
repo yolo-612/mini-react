@@ -20,6 +20,7 @@ function createTextNode (text){
   }
 }
 
+let rootDom = null
 function render(el, container){
   nextWorkOfUnit = {
     dom: container,
@@ -27,6 +28,7 @@ function render(el, container){
       children: [el]
     }
   }
+  rootDom = nextWorkOfUnit
 }
 
 // 这个是替换 之前递归的过程的
@@ -40,8 +42,25 @@ function workLoop(deadline){
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit)
     shouldYield = deadline.timeRemaining() < 1
   }
+  // 集中渲染节点 [root 仅仅添加一次，因为任务调度器会执行多次]
+  if(!nextWorkOfUnit && root){
+    commitRoot(root.child)
+  }
   
   requestIdleCallback(workLoop)
+}
+
+// 渲染节点
+function commitRoot(){
+  commitWork(root.child)
+  root = null
+}
+
+function commitWork(fiber){
+  if(!fiber) return 
+  fiber.parent.dom.append(fiber.dom)
+  commitWork(fiber.child)
+  commitWork(fiber.sibling)
 }
 
 // 创建dom
@@ -91,7 +110,7 @@ function performWorkOfUnit(fiber){
     const dom =  (fiber.dom = createDom(fiber.type))
 
     // 添加节点
-    fiber.parent.dom.append(dom)
+    // fiber.parent.dom.append(dom)
 
     // 2. 执行props赋值属性
     updateProps(dom, fiber.props)
