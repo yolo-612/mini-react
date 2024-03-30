@@ -57,8 +57,13 @@ function commitRoot(){
 }
 
 function commitWork(fiber){
-  if(!fiber) return 
-  fiber.parent.dom.append(fiber.dom)
+  if(!fiber) return
+  let fiberParent = fiber.parent
+  if(!fiberParent.dom){
+    fiberParent = fiberParent.parent
+  }
+  if(fiber.dom) fiberParent.dom.append(fiber.dom)
+  
   commitWork(fiber.child)
   commitWork(fiber.sibling)
 }
