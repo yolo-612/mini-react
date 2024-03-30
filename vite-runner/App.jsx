@@ -9,7 +9,6 @@ function App (){
   hi- jiangjiang yolo612
   <AppOne num={10}></AppOne>
   12299
-  <AppOne num={20}></AppOne>
   </div>
 }
 
@@ -21,8 +20,15 @@ function App (){
 //   return /* @__PURE__ */ React.createElement("div", { id: "1212" }, "12899", /* @__PURE__ */ React.createElement("div", { id: "hihi" }, "hihi"));
 // } 
 
+function handleClick(){
+  console.log('event click')
+}
+
 function AppOne({num}){
-  return <div id="1212">12899: {num}</div>
+  return <div id="1212">
+    12899: {num}
+    <button onClick={handleClick}>点击</button>
+  </div>
 }
 
 function AppOneContainer(){
