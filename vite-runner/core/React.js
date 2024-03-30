@@ -106,34 +106,47 @@ function initChildren(fiber, children){
   })
 }
 
+// 更新functionComponent
+function updateFunctionComponent(fiber){
+  // **function component 不创建dom**
+  
+  // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
+  // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
+  const children = [fiber.type(fiber.props)]
+  initChildren(fiber, children)
+}
+
+// 更新常规节点
+function updateHostComponent(fiber){
+  if(!fiber.dom){
+    // 1. 创建dom
+    const dom =  (fiber.dom = createDom(fiber.type))
+
+    // 添加节点
+    // fiber.parent.dom.append(dom)
+
+    // 2. 执行props赋值属性
+    updateProps(dom, fiber.props)
+  }  
+
+  // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
+  const children = fiber.props.children
+  initChildren(fiber, children)
+}
+
 
 // 返回下一个需要执行的任务
 function performWorkOfUnit(fiber){
 
   const isFunctionComponent = typeof fiber.type === 'function'
   if(isFunctionComponent ) {
-    console.log(fiber, '===>')
-    console.log(fiber.type(fiber.props), fiber)
-    console.log(fiber.props, '组件支持传参，参数是到props中的')
+    // console.log(fiber, '===>')
+    // console.log(fiber.type(fiber.props), fiber)
+    // console.log(fiber.props, '组件支持传参，参数是到props中的')
+    updateFunctionComponent(fiber)
+  } else {
+    updateHostComponent(fiber)
   }
-  // **function component 不创建dom**
-  if(!isFunctionComponent){
-    if(!fiber.dom){
-      // 1. 创建dom
-      const dom =  (fiber.dom = createDom(fiber.type))
-  
-      // 添加节点
-      // fiber.parent.dom.append(dom)
-  
-      // 2. 执行props赋值属性
-      updateProps(dom, fiber.props)
-    }  
-  } 
-  
-  // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
-  // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
-  const children = isFunctionComponent ? [fiber.type(fiber.props)] : fiber.props.children
-  initChildren(fiber, children)
 
   // 4. 返回下一个需要渲染的节点
   if(fiber.child) return fiber.child
