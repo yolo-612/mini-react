@@ -8,6 +8,8 @@ function App (){
   return <div>
   hi- jiangjiang yolo612
   <AppOne num={10}></AppOne>
+  12299
+  <AppOne num={20}></AppOne>
   </div>
 }
 

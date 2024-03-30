@@ -137,8 +137,14 @@ function performWorkOfUnit(fiber){
 
   // 4. 返回下一个需要渲染的节点
   if(fiber.child) return fiber.child
-  if(fiber.sibling) return fiber.sibling
-  return fiber.parent?.sibling
+  // ** 支持function component 改造逻辑 [由于引入function component , 叔叔节点获取规则需要层层向上遍历]**
+  // if(fiber.sibling) return fiber.sibling
+  let newFiber = fiber
+  while(newFiber){
+    if(newFiber.sibling) return newFiber.sibling
+    newFiber = newFiber.parent
+  }
+  // return fiber.parent?.sibling
 }
 
 requestIdleCallback(workLoop)
