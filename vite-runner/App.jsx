@@ -4,10 +4,12 @@ import React from "./core/React.js"
 // const App = React.createElement('div', {id: 'app'}, 'app6', ' text1212')
 
 // 这里怎么触发React的api了？？？？？ ===> jsx文件编译静默触发
-const App = <div>
+function App (){
+  return <div>
   hi- jiangjiang yolo612
   <AppOne></AppOne>
   </div>
+}
 
 // ===》 打印一下看看
 
@@ -17,9 +19,12 @@ const App = <div>
 //   return /* @__PURE__ */ React.createElement("div", { id: "1212" }, "12899", /* @__PURE__ */ React.createElement("div", { id: "hihi" }, "hihi"));
 // } 
 
-
 function AppOne(){
   return <div id="1212">12899</div>
+}
+
+function AppOneContainer(){
+  return <AppOne></AppOne>
 }
 
 // console.log(AppOne, '===>')

@@ -3,7 +3,7 @@
 // import React from "../core/React.js"
 
 // console.log(App, 'main===>')
-// ReactDOM.createRoot(document.getElementById('root')).render(<App></App>)
+// ReactDOM.createRoot(document.getElementById('root')).render()
 
 // 会报错：
 // Uncaught DOMException: Failed to execute 'createElement' on 'Document': The tag name provided ('[object Object]') is not a valid name.
@@ -14,5 +14,5 @@ import ReactDOM from "./core/ReactDom.js"
 import App from "./App.jsx"
 import React from "./core/React.js"
 
-ReactDOM.createRoot(document.getElementById('root')).render(App)
+ReactDOM.createRoot(document.getElementById('root')).render(<App></App>)
 
