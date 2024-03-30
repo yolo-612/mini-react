@@ -20,7 +20,7 @@ function createTextNode (text){
   }
 }
 
-let rootDom = null
+let root = null
 function render(el, container){
   nextWorkOfUnit = {
     dom: container,
@@ -28,7 +28,7 @@ function render(el, container){
       children: [el]
     }
   }
-  rootDom = nextWorkOfUnit
+  root = nextWorkOfUnit
 }
 
 // 这个是替换 之前递归的过程的
@@ -44,7 +44,7 @@ function workLoop(deadline){
   }
   // 集中渲染节点 [root 仅仅添加一次，因为任务调度器会执行多次]
   if(!nextWorkOfUnit && root){
-    commitRoot(root.child)
+    commitRoot()
   }
   
   requestIdleCallback(workLoop)
