@@ -4,7 +4,8 @@ function createElement(type, props, ...children){
     props: {
       ...props,
       children: children.map((child)=>{
-        return typeof child === 'string' ? createTextNode(child) : child
+        const isTextNode = typeof child === 'string'  || typeof child === 'number'
+        return isTextNode ? createTextNode(child) : child
       })
     }
   }
@@ -110,7 +111,11 @@ function initChildren(fiber, children){
 function performWorkOfUnit(fiber){
 
   const isFunctionComponent = typeof fiber.type === 'function'
-  if(isFunctionComponent ) console.log(fiber.type(), fiber)
+  if(isFunctionComponent ) {
+    console.log(fiber, '===>')
+    console.log(fiber.type(fiber.props), fiber)
+    console.log(fiber.props, '组件支持传参，参数是到props中的')
+  }
   // **function component 不创建dom**
   if(!isFunctionComponent){
     if(!fiber.dom){
@@ -127,7 +132,7 @@ function performWorkOfUnit(fiber){
   
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
-  const children = isFunctionComponent ? [fiber.type()] : fiber.props.children
+  const children = isFunctionComponent ? [fiber.type(fiber.props)] : fiber.props.children
   initChildren(fiber, children)
 
   // 4. 返回下一个需要渲染的节点

@@ -7,7 +7,7 @@ import React from "./core/React.js"
 function App (){
   return <div>
   hi- jiangjiang yolo612
-  <AppOne></AppOne>
+  <AppOne num={10}></AppOne>
   </div>
 }
 
@@ -19,8 +19,8 @@ function App (){
 //   return /* @__PURE__ */ React.createElement("div", { id: "1212" }, "12899", /* @__PURE__ */ React.createElement("div", { id: "hihi" }, "hihi"));
 // } 
 
-function AppOne(){
-  return <div id="1212">12899</div>
+function AppOne({num}){
+  return <div id="1212">12899: {num}</div>
 }
 
 function AppOneContainer(){
