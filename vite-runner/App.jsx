@@ -20,13 +20,20 @@ function App (){
 //   return /* @__PURE__ */ React.createElement("div", { id: "1212" }, "12899", /* @__PURE__ */ React.createElement("div", { id: "hihi" }, "hihi"));
 // } 
 
-function handleClick(){
-  console.log('event click')
-}
+
+let count = 10
 
 function AppOne({num}){
+  // update测试
+  function handleClick(){
+    console.log('event click')
+    count++
+    React.update()
+  }
+
   return <div id="1212">
     12899: {num}
+    test update Props: { count }
     <button onClick={handleClick}>点击</button>
   </div>
 }

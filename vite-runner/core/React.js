@@ -22,6 +22,7 @@ function createTextNode (text){
 }
 
 let root = null
+let currentRoot = null
 function render(el, container){
   nextWorkOfUnit = {
     dom: container,
@@ -54,6 +55,7 @@ function workLoop(deadline){
 // 渲染节点
 function commitRoot(){
   commitWork(root.child)
+  currentRoot = root
   root = null
 }
 
@@ -63,8 +65,14 @@ function commitWork(fiber){
   while(!fiberParent.dom){
     fiberParent = fiberParent.parent
   }
-  if(fiber.dom) fiberParent.dom.append(fiber.dom)
-  
+
+  // 放在这里更新props
+  if(fiber.effectTag === 'update'){
+    updateProps(fiber.dom, fiber.props, fiber.alternate?.props)
+  }else if(fiber.effectTag === 'placement'){
+    if(fiber.dom) fiberParent.dom.append(fiber.dom)
+  }
+
   commitWork(fiber.child)
   commitWork(fiber.sibling)
 }
@@ -76,14 +84,31 @@ function createDom(type){
 }
 
 // 执行props赋值属性
-function updateProps(dom, props){
-  Object.keys(props).forEach((prop)=>{
-    if(prop !== 'children'){
-      if(prop.startsWith('on')){
-        const eventType = prop.slice(2).toLocaleLowerCase()
-        dom.addEventListener(eventType, props[prop])
-      } else{
-        dom[prop] = props[prop]
+function updateProps(dom, nextProps, prevProps){
+  // 1. old的有，new的没有==》删除
+  Object.keys(prevProps).forEach((prevKey)=>{
+    if(prevKey !== 'children'){
+      // 自己的写法
+      // if(!Object.keys(nextProps).includes(prevKey)){
+      //   dom.removeAttribute(prevKey)
+      // }
+      if(!(prevKey in nextProps)){
+        dom.removeAttribute(prevKey)
+      }
+    }
+  })
+
+  // 2. new有，old没有===>添加
+  // 3. new有，old有==》修改
+  Object.keys(nextProps).forEach((key)=>{
+    if(key !== 'children'){
+      if(nextProps[key] !== prevProps[key]){
+        if(key.startsWith('on')){
+          const eventType = key.slice(2).toLocaleLowerCase()
+          dom.addEventListener(eventType, nextProps[key])
+        } else{
+          dom[key] = nextProps[key]
+        }
       }
     }
   })
@@ -93,14 +118,37 @@ function updateProps(dom, props){
 function initChildren(fiber, children){
   let prevChild = null
 
+  // 这是各公用的initChildren方法，再render的时候是没有alternate的，但在update的时候有
+  let oldFiber = fiber.alternate?.child
   children.forEach((child, index)=>{
-    const newFiberItem = {
-      type: child.type,
-      props: child.props,
-      child: null,
-      parent: fiber,
-      sibling: null,
-      dom: null
+    let newFiberItem
+    const isSameType = oldFiber && oldFiber.type === child.type
+    if(isSameType){
+      // update
+      newFiberItem = {
+        type: child.type,
+        props: child.props,
+        child: null,
+        parent: fiber,
+        sibling: null,
+        dom: oldFiber.dom,
+        alternate: oldFiber,
+        effectTag: 'update'
+      }
+    }else{
+      newFiberItem = {
+        type: child.type,
+        props: child.props,
+        child: null,
+        parent: fiber,
+        sibling: null,
+        dom: null,
+        effectTag: 'placement'
+      }
+    }
+    // 不需要找叔叔节点吗====因为这里遍历子节点
+    if(oldFiber && oldFiber.sibling){
+      oldFiber = oldFiber.sibling
     }
     if(index === 0){
       fiber.child = newFiberItem
@@ -131,7 +179,7 @@ function updateHostComponent(fiber){
     // fiber.parent.dom.append(dom)
 
     // 2. 执行props赋值属性
-    updateProps(dom, fiber.props)
+    updateProps(dom, fiber.props, {})
   }  
 
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
@@ -168,7 +216,19 @@ function performWorkOfUnit(fiber){
 requestIdleCallback(workLoop)
 
 
+function update(){
+  nextWorkOfUnit = {
+    dom: currentRoot.dom,
+    props: currentRoot.props,
+    alternate: currentRoot
+  }
+  root = nextWorkOfUnit
+}
+
+
+
 const React = {
+  update,
   createElement,
   render
 }
