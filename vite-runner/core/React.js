@@ -105,6 +105,8 @@ function updateProps(dom, nextProps, prevProps){
       if(nextProps[key] !== prevProps[key]){
         if(key.startsWith('on')){
           const eventType = key.slice(2).toLocaleLowerCase()
+          // TODO： 不理解，解决点击触发多次的bug的
+          dom.removeEventListener(eventType, prevProps[key])
           dom.addEventListener(eventType, nextProps[key])
         } else{
           dom[key] = nextProps[key]

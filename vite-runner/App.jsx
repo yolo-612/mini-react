@@ -22,16 +22,17 @@ function App (){
 
 
 let count = 10
-
+let props = { id: 'xxxxxxxxxxxxxxx'}
 function AppOne({num}){
   // update测试
   function handleClick(){
     console.log('event click')
     count++
+    props = {}
     React.update()
   }
 
-  return <div id="1212">
+  return <div {...props}>
     12899: {num}
     test update Props: { count }
     <button onClick={handleClick}>点击</button>
