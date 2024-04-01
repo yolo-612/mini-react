@@ -21,16 +21,16 @@ function createTextNode (text){
   }
 }
 
-let root = null
+let wipRoot = null // wipRoot ===> workIn
 let currentRoot = null
 function render(el, container){
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: container,
     props: {
       children: [el]
     }
   }
-  root = nextWorkOfUnit
+  nextWorkOfUnit = wipRoot
 }
 
 // 这个是替换 之前递归的过程的
@@ -44,8 +44,8 @@ function workLoop(deadline){
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit)
     shouldYield = deadline.timeRemaining() < 1
   }
-  // 集中渲染节点 [root 仅仅添加一次，因为任务调度器会执行多次]
-  if(!nextWorkOfUnit && root){
+  // 集中渲染节点 [wipRoot 仅仅添加一次，因为任务调度器会执行多次]
+  if(!nextWorkOfUnit && wipRoot){
     commitRoot()
   }
   
@@ -54,9 +54,9 @@ function workLoop(deadline){
 
 // 渲染节点
 function commitRoot(){
-  commitWork(root.child)
-  currentRoot = root
-  root = null
+  commitWork(wipRoot.child)
+  currentRoot = wipRoot
+  wipRoot = null
 }
 
 function commitWork(fiber){
@@ -117,7 +117,7 @@ function updateProps(dom, nextProps, prevProps){
 }
 
 // 转换成链表
-function initChildren(fiber, children){
+function reconcileChildren(fiber, children){
   let prevChild = null
 
   // 这是各公用的initChildren方法，再render的时候是没有alternate的，但在update的时候有
@@ -168,7 +168,7 @@ function updateFunctionComponent(fiber){
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
   const children = [fiber.type(fiber.props)]
-  initChildren(fiber, children)
+  reconcileChildren(fiber, children)
 }
 
 // 更新常规节点
@@ -186,7 +186,7 @@ function updateHostComponent(fiber){
 
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   const children = fiber.props.children
-  initChildren(fiber, children)
+  reconcileChildren(fiber, children)
 }
 
 
@@ -219,12 +219,12 @@ requestIdleCallback(workLoop)
 
 
 function update(){
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: currentRoot.dom,
     props: currentRoot.props,
     alternate: currentRoot
   }
-  root = nextWorkOfUnit
+  nextWorkOfUnit = wipRoot
 }
 
 
