@@ -21,6 +21,9 @@ function createTextNode (text){
   }
 }
 
+
+
+
 let wipRoot = null // wipRoot ===> workIn
 let currentRoot = null
 function render(el, container){
