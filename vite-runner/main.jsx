@@ -12,7 +12,8 @@
 
 import ReactDOM from "./core/ReactDom.js"
 // import App from "./App.jsx"
-import App from "./5demojsx/5-2Children.jsx"
+// import App from "./5demojsx/5-2Children.jsx"
+import App from "./5demojsx/5-3edge.jsx"
 
 import React from "./core/React.js"
 
