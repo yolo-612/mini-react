@@ -25,6 +25,7 @@ function createTextNode (text){
 
 
 let wipRoot = null // wipRoot ===> workIn
+let wipFiber = null
 let currentRoot = null
 function render(el, container){
   wipRoot = {
@@ -45,6 +46,11 @@ function workLoop(deadline){
   while(!shouldYield && nextWorkOfUnit){
     // 开始执行work任务
     nextWorkOfUnit = performWorkOfUnit(nextWorkOfUnit)
+
+    // 优化更新child时，结束点控制
+    if(wipRoot?.sibling?.type === nextWorkOfUnit?.type) {
+      nextWorkOfUnit = undefined
+    }
     shouldYield = deadline.timeRemaining() < 1
   }
   // 集中渲染节点 [wipRoot 仅仅添加一次，因为任务调度器会执行多次]
@@ -196,7 +202,7 @@ function reconcileChildren(fiber, children){
 // 更新functionComponent
 function updateFunctionComponent(fiber){
   // **function component 不创建dom**
-  
+  wipFiber = fiber
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
   const children = [fiber.type(fiber.props)]
@@ -251,12 +257,17 @@ requestIdleCallback(workLoop)
 
 
 function update(){
-  wipRoot = {
-    dom: currentRoot.dom,
-    props: currentRoot.props,
-    alternate: currentRoot
+  let currentFiber = wipFiber
+  // **注意这里必须使用闭包才能获取到当前点击的那个**
+  // ？？？？为什么使用闭包
+  return ()=>{
+    // console.log(currentFiber, 'gengxin===>')
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber
+    }
+    nextWorkOfUnit = wipRoot
   }
-  nextWorkOfUnit = wipRoot
 }
 
 
