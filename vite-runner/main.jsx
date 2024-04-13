@@ -11,7 +11,8 @@
 // console.log(App)
 
 import ReactDOM from "./core/ReactDom.js"
-import App from "./App.jsx"
+// import App from "./App.jsx"
+import App from "./5demojsx/5-1Children.jsx"
 import React from "./core/React.js"
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App></App>)

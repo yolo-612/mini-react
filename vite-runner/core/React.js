@@ -55,11 +55,27 @@ function workLoop(deadline){
   requestIdleCallback(workLoop)
 }
 
+let deletions = []
+
 // 渲染节点
 function commitRoot(){
+  deletions.forEach(commitDeletion)
+  deletions = []
   commitWork(wipRoot.child)
   currentRoot = wipRoot
   wipRoot = null
+}
+
+function commitDeletion(fiber){
+  if(fiber.dom){
+    let fiberParent = fiber.parent
+    while(!fiberParent.dom){
+      fiberParent = fiberParent.parent
+    }
+    fiberParent.dom.removeChild(fiber.dom)
+  }else{
+    commitDeletion(fiber.child)
+  }
 }
 
 function commitWork(fiber){
@@ -149,6 +165,10 @@ function reconcileChildren(fiber, children){
         sibling: null,
         dom: null,
         effectTag: 'placement'
+      }
+
+      if(oldFiber) {
+        deletions.push(oldFiber)
       }
     }
     // 不需要找叔叔节点吗====因为这里遍历子节点
