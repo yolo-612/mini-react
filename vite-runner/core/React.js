@@ -172,7 +172,7 @@ function reconcileChildren(fiber, children){
       }
     }
     // 不需要找叔叔节点吗====因为这里遍历子节点
-    if(oldFiber && oldFiber.sibling){
+    if(oldFiber){
       oldFiber = oldFiber.sibling
     }
     if(index === 0){
