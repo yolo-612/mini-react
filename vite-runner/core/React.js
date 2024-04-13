@@ -182,6 +182,11 @@ function reconcileChildren(fiber, children){
     }
     prevChild = newFiberItem
   })
+
+  while(oldFiber){
+    deletions.push(oldFiber)
+    oldFiber = oldFiber.sibling
+  }
 }
 
 // 更新functionComponent
