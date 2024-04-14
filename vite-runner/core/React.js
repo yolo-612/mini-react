@@ -21,9 +21,6 @@ function createTextNode (text){
   }
 }
 
-
-
-
 let wipRoot = null // wipRoot ===> workIn
 let wipFiber = null
 let currentRoot = null
@@ -270,10 +267,36 @@ function update(){
   }
 }
 
+function useState(initial){
+  // **注意这里必须使用闭包，才能获取到当前点击的functionComponent**
+  // ？？？？为什么使用闭包
+  let currentFiber = wipFiber
 
+  // console.log(wipFiber, '===>')
+
+  let oldHook = currentFiber.alternate?.stateHook
+
+  const stateHook = {
+    state: oldHook?.state ? oldHook?.state : initial
+  }
+
+  currentFiber.stateHook = stateHook
+
+  function setState(actions){
+    stateHook.state = actions(stateHook.state)
+
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber
+    }
+    nextWorkOfUnit = wipRoot
+  }
+  return [stateHook.state, setState]
+}
 
 const React = {
   update,
+  useState,
   createElement,
   render
 }
