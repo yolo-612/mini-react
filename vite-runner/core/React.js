@@ -65,8 +65,34 @@ function commitRoot(){
   deletions.forEach(commitDeletion)
   deletions = []
   commitWork(wipRoot.child)
+  commitEffectHook()
   currentRoot = wipRoot
   wipRoot = null
+}
+
+// 从哪里fiber开始执行呢？[从根开始去运行, 多个functionComponent都需要去执行，而useState使用了闭包]
+function commitEffectHook(){
+  // if(!fiber.alternate)
+  function run(fiber){
+    if(!fiber) return
+
+    if(!fiber.alternate){
+      // init
+      fiber?.effectHook?.callback()
+    }else{
+      // update
+      const oldEffectHook = fiber.alternate?.effectHook
+      const needUpdate = oldEffectHook?.deps.some((oldDep, index)=>{
+        return fiber.effectHook.deps[index] !== oldDep
+      })
+
+      needUpdate &&  fiber.effectHook?.callback()
+
+    }
+    run(fiber.child)
+    run(fiber.sibling)
+  }
+  run(wipRoot)
 }
 
 function commitDeletion(fiber){
@@ -299,7 +325,7 @@ function useState(initial){
     // 处理值一样的情况
     const eagerState = typeof action === "function" ? action(stateHook.state) : action
     if (eagerState === stateHook.state) return
-    
+
     // stateHook.state = action(stateHook.state)
     stateHook.queue.push(typeof action === "function" ? action : () => action)
 
@@ -312,9 +338,19 @@ function useState(initial){
   return [stateHook.state, setState]
 }
 
+function useEffect(callback, deps){
+  const effectHook = {
+    callback,
+    deps
+  }
+
+  wipFiber.effectHook = effectHook
+}
+
 const React = {
   update,
   useState,
+  useEffect,
   createElement,
   render
 }

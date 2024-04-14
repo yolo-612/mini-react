@@ -14,7 +14,9 @@ import ReactDOM from "./core/ReactDom.js"
 // import App from "./App.jsx"
 // import App from "./5demojsx/5-2Children.jsx"
 // import App from "./5demojsx/5-4optUpdate.jsx"
-import App from "./6demouseState/6-2multiAction.jsx"
+// import App from "./6demouseState/6-2multiAction.jsx"
+import App from "./7demouseEffect/7-1useEffect.jsx"
+
 
 
 import React from "./core/React.js"
