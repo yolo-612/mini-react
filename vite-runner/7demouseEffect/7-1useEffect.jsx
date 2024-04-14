@@ -16,8 +16,12 @@ function Foo() {
   }, []);
 
   React.useEffect(() => {
-    console.log("update");
+    console.log("update",count);
   }, [count]);
+
+  // React.useEffect(() => {
+  //   console.log("update bar");
+  // }, [bar]);
 
   return (
     <div>

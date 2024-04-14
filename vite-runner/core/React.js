@@ -78,16 +78,24 @@ function commitEffectHook(){
 
     if(!fiber.alternate){
       // init
-      fiber?.effectHook?.callback()
+      fiber?.effectHooks?.forEach((hook)=>{
+        hook.callback()
+      })
     }else{
       // update
-      const oldEffectHook = fiber.alternate?.effectHook
-      const needUpdate = oldEffectHook?.deps.some((oldDep, index)=>{
-        return fiber.effectHook.deps[index] !== oldDep
-      })
+      // deps 有没有发生改变
+      fiber.effectHooks?.forEach((newHook, index) => {
+        if (newHook.deps.length > 0) {
+          const oldEffectHook = fiber.alternate?.effectHooks[index];
 
-      needUpdate &&  fiber.effectHook?.callback()
+          // some
+          const needUpdate = oldEffectHook?.deps.some((oldDep, i) => {
+            return oldDep !== newHook.deps[i];
+          });
 
+          needUpdate && newHook.callback();
+        }
+      });
     }
     run(fiber.child)
     run(fiber.sibling)
@@ -227,6 +235,7 @@ function updateFunctionComponent(fiber){
   // **function component 不创建dom**
   stateHookIndex = 0
   stateHooks = []
+  effectHooks = []
   wipFiber = fiber
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
@@ -338,13 +347,15 @@ function useState(initial){
   return [stateHook.state, setState]
 }
 
+let effectHooks
 function useEffect(callback, deps){
   const effectHook = {
     callback,
     deps
   }
 
-  wipFiber.effectHook = effectHook
+  effectHooks.push(effectHook)
+  wipFiber.effectHooks = effectHooks
 }
 
 const React = {
