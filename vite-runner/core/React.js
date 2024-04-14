@@ -199,6 +199,8 @@ function reconcileChildren(fiber, children){
 // 更新functionComponent
 function updateFunctionComponent(fiber){
   // **function component 不创建dom**
+  stateHookIndex = 0
+  stateHooks = []
   wipFiber = fiber
   // 3. 转换链表，映射对应节点关系【child、sibling，叔叔【parent.sibling】】
   // **function component 的children结构不在自身的属性上 ，而在其type调用之后的结构里面**
@@ -266,7 +268,8 @@ function update(){
     nextWorkOfUnit = wipRoot
   }
 }
-
+let stateHookIndex
+let stateHooks
 function useState(initial){
   // **注意这里必须使用闭包，才能获取到当前点击的functionComponent**
   // ？？？？为什么使用闭包
@@ -274,13 +277,15 @@ function useState(initial){
 
   // console.log(wipFiber, '===>')
 
-  let oldHook = currentFiber.alternate?.stateHook
+  let oldHook = currentFiber.alternate?.stateHooks[stateHookIndex]
 
   const stateHook = {
-    state: oldHook?.state ? oldHook?.state : initial
+    state: oldHook ? oldHook?.state : initial
   }
 
-  currentFiber.stateHook = stateHook
+  stateHookIndex++
+  stateHooks.push(stateHook)
+  currentFiber.stateHooks = stateHooks
 
   function setState(actions){
     stateHook.state = actions(stateHook.state)
