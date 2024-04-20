@@ -70,6 +70,7 @@ function commitRoot(){
   wipRoot = null
 }
 
+
 // 从哪里fiber开始执行呢？[从根开始去运行, 多个functionComponent都需要去执行，而useState使用了闭包]
 function commitEffectHook(){
   // if(!fiber.alternate)
@@ -78,8 +79,8 @@ function commitEffectHook(){
 
     if(!fiber.alternate){
       // init
-      fiber?.effectHooks?.forEach((hook)=>{
-        hook.callback()
+      fiber?.effectHooks?.forEach((hook, index)=>{
+        hook.cleanup = hook.callback()
       })
     }else{
       // update
@@ -93,13 +94,29 @@ function commitEffectHook(){
             return oldDep !== newHook.deps[i];
           });
 
-          needUpdate && newHook.callback();
+          needUpdate && (newHook.cleanup = newHook.callback());
         }
       });
     }
     run(fiber.child)
     run(fiber.sibling)
   }
+
+  function runCleanup(fiber){
+    if(!fiber) return
+    // 直接找alternate，
+    // 因为首次render时候cleanup执行下面run函数才刚赋值
+    fiber.alternate?.effectHooks?.forEach((hook)=>{
+      if(hook.deps.length > 0){
+        hook.cleanup && hook.cleanup()
+      }
+    })
+    runCleanup(fiber.child)
+    runCleanup(fiber.sibling)
+  }
+  
+  runCleanup(wipRoot)
+
   run(wipRoot)
 }
 
@@ -351,7 +368,8 @@ let effectHooks
 function useEffect(callback, deps){
   const effectHook = {
     callback,
-    deps
+    deps,
+    cleanup: undefined
   }
 
   effectHooks.push(effectHook)
